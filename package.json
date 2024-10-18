@@ -1,0 +1,33 @@
+{
+  "name": "@kautsu/temporal",
+  "version": "1.0.0",
+  "description": "The temporal structure compatible with Temporal release candidate library.",
+  "main": "dist/index_bundle.js",
+  "scripts": {
+    "test": "mocha",
+    "build": "npm run test && webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kartagia/temporaljs.git"
+  },
+  "keywords": [
+    "temporal",
+    "library"
+  ],
+  "author": "Antti Kautiainen <antti@kautiainen.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kartagia/temporaljs/issues"
+  },
+  "homepage": "https://github.com/Kartagia/temporaljs#readme",
+  "devDependencies": {
+    "@babel/core": "^7.25.8",
+    "@babel/preset-env": "^7.25.8",
+    "babel-loader": "^9.2.1",
+    "chai": "^5.1.1",
+    "mocha": "^10.7.3",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
