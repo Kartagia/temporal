@@ -14,6 +14,47 @@
  */
 
 /**
+ * Is a value an Integer.
+ * @param {*} value The tested value.
+ * @returns {boolean} True, if and only if the value is an integer.
+ */
+export function isInteger(value) {
+    switch (typeof value) {
+        case "bigint":
+            return true;
+        case "number":
+            return Number.isSafeInteger(value);
+        default:
+            return false;
+    }
+}
+
+/**
+ * 
+ * @template [EXCEPTION=SyntaxError] The exception type of the test.
+ * @template [CAUSE=any] The cause of the failure.
+ * @param {*} value Tested value.
+ * @param {Object} [options] The options of the testing.
+ * @param {string} [options.message] The error message of the exception. Defaults to "Not an integer value".
+ * @param {(msg: string, cause?: CAUSE = undefined) => EXCEPTION} [options.exception] The method creating the exception.
+ * @returns {Integer} The given value as an Integer.
+ * @throws {EXCEPTION} the exception 
+ */
+export function asInteger(value, options={}) {
+    if (isInteger(value)) {
+        switch (typeof value) {
+            case "number":
+                return /**@type {Int} */ value;
+            case "bigint":
+                return value;
+            default:
+                throw Error("Is Integer accepted an invalid value");
+        }
+    } 
+    throw (options.exception ?? ((message, cause=undefined) => (new SyntaxError(message, cause))))(options.message ?? "Not an integer value");
+}
+
+/**
  * The temporal field options.
  * @typedef {Object} TemporalFieldOptions
  * @property {Integer} [min=1] The smallest accepted value.
@@ -55,12 +96,19 @@
  */
 export function createDay(dayValue, options={}) {
     
+    if (!isInteger(dayValue)) {
+        throw new TypeError("Cannot create a day from non-integer value");
+    }
+
     const actualOptions = {
-        min: this.options.min ?? 1, max: this.options.max ?? Number.MAX_SAFE_INTEGER
+        min: options.min ?? 1, max: options.max ?? Number.MAX_SAFE_INTEGER
     };
     
-    return {
-        get name() {
+    /**
+     * @type {Day}
+     */
+    const result =  {
+        get fieldName() {
             return "day"
         },
         get day() {
@@ -89,9 +137,10 @@ export function createDay(dayValue, options={}) {
             }
         },
         toJSON() {
-            return JSON.stringify({day: this.day, options});
+            return JSON.stringify([this.day, options]);
         }
     };
+    return result;
 }
 
 /**
