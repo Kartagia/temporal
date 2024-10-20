@@ -5,8 +5,7 @@
  */
 
 import { expect } from "chai";
-import { it } from "mocha";
-import { testTestCase } from "../testFramework/index.mjs";
+import { createTestResult, testTestCase } from "../testFramework/index.mjs";
 import { createDay } from "../../src/temporal.mjs";
 
 const MODULE_NAME = "TemporalDay - Testing Temporal Day";
@@ -14,7 +13,7 @@ const MODULE_NAME = "TemporalDay - Testing Temporal Day";
 /**
  * The sub modules. 
  */
-const subModules = [
+const testCases = [
 
     ...[1,15, 31, 365, 366].map( (dayValue) => (
         
@@ -23,10 +22,10 @@ const subModules = [
          */
         {
         title: `Create simple day ${dayValue}`,
-        param: dayValue,
+        param: [dayValue],
         tested: createDay,
         test(tested, param) {
-            return tested(param);
+            return tested(...(param ? param : []));
         },
         resultValidator: ( /** @type {Day} */ tested) => {
             expect(tested).a("object");
@@ -41,12 +40,20 @@ const subModules = [
  * The test module of day.
  * @type {import("../testFramework/index.mjs").TestModule}
  */
-export default function TestDay() {
-    describe(`Module ${MODULE_NAME}`, function () {
-        subModules.forEach( (subModule, index) => {
-            it(`Test #${index}: ${subModule.title}`, function () {
-                testTestCase(subModule);
+export const TestDay = {
+        title: "Temporal Day",
+        test() {
+            var result = createTestResult();
+            describe(`Test ${TestDay.title}`, function () {
+            testCases.forEach( (subModule, index) => {
+                const testResult = testTestCase(subModule, index);
+                result.passed += testResult.passed;
+                result.failed += testResult.failed;
+                result.skipped += testResult.skipped;
             });
-        });    
-    })
+            return result;
+        })
+    }
 };
+
+export default TestDay;
