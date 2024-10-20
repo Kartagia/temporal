@@ -5,43 +5,37 @@ import { describe, it } from "mocha";
  * The main test for the library.
  */
 
-/**
- * The test result. 
- * @typedef {Object} TestResult
- * @property {number} passed The number of passed tests.
- * @property {number} failed The number of failed tests.
- * @property {number} skipped The number of skipped tests.
- */
+//import DayModule from "./day/day.test.mjs";
 
 /**
- * @typedef {Object} TestModule
- * @property {() => TestResult} test The function performing the test. 
+ * @type {import("./testFramework/index.mjs").TestModule[]}
  */
-
-const testModules = [];
+const testModules = [
+//    DayModule
+];
 const options = {
     failureThreshold: 0
 }
 
 describe("Testing the library", function () {
-    const result = {
+    var result = {
         passed: 0, 
         failed: 0,
         skipped: 0,
-        get passed() {
+        get success() {
             return this.failed <= options.failureThreshold;
         },
     }
     testModules.forEach( (module) => {
         it(`Test Module ${module.name}`, function () {
-            const testResult = module.test();
-            result.passed += testResult?.passed ?? 0;
-            result.failed += testResult?.failed ?? 0;
-            result.skipped += testResult?.skipped ?? 0;
+            const testResult = module();
+            result.passed += (testResult?.passed) ?? 0;
+            result.failed += (testResult?.failed) ?? 0;
+            result.skipped += (testResult?.skipped) ?? 0;
         });
     });
 
     it("Library test", function () {
-        expect(result.passed, "Library test failed.").true;
+        expect(result.success, "Library test failed.").true;
     });
 });
