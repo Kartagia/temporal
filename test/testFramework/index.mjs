@@ -85,26 +85,28 @@ export function createTestResult(options={}) {
  * @param {TestCase<TYPE, PARAM,  RESULT, EXCEPTION>} testCase The test case.
  * @returns {import("../main.test.mjs").TestResult} The test result.
  */
-export function testTestCase(testCase) {
+export function testTestCase(testCase, index=undefined) {
     const result = createTestResult();
     try {
-        if (testCase.exception !== undefined) {
-            expect(() => {testCase.test(testCase.tested, testCase.param)}).throw(testCase.exception);
-            result.passed++;
-        } else {
-            var testResult = undefined;
-            expect( () => { testResult = testCase.test(testCase.tested, testCase.param)}).not.throw();
-            if (testCase.expected !== undefined) {
-                expect(testResult).equals(testCase.expected);
+        it(`Test Case ${index == null ? "" : `#${index}`}${testCase.title ?? ""}`, function() {
+            if (testCase.exception !== undefined) {
+                expect(() => {testCase.test(testCase.tested, testCase.param)}).throw(testCase.exception);
+                result.passed++;
+            } else {
+                var testResult = undefined;
+                expect( () => { testResult = testCase.test(testCase.tested, testCase.param)}).not.throw();
+                if (testCase.expected !== undefined) {
+                    expect(testResult).equals(testCase.expected);
+                }
+                if (testCase.testedValidator !== undefined) {
+                    testCase.testedValidator(tested);
+                }
+                if (testCase.resultValidator !== undefined) {
+                    testCase.resultValidator(testResult);
+                }
+                result.passed++;
             }
-            if (testCase.testedValidator !== undefined) {
-                testCase.testedValidator(tested);
-            }
-            if (testCase.resultValidator !== undefined) {
-                testCase.resultValidator(testResult);
-            }
-            result.passed++;
-        }
+        })
     } catch(error) {
         result.failed++;        
     }
