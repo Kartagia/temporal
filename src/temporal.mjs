@@ -85,6 +85,7 @@ export function asInteger(value, options={}) {
  */
 
 /**
+ * The temporal field representing a day.
  * @typedef {DayProps & TemporalFieldProperties & TemporalFieldMethods} Day
  */
 
