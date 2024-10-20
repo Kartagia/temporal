@@ -5,13 +5,13 @@ import { describe, it } from "mocha";
  * The main test for the library.
  */
 
-//import DayModule from "./day/day.test.mjs";
+import DayModule from "./day/day.test.mjs";
 
 /**
  * @type {import("./testFramework/index.mjs").TestModule[]}
  */
 const testModules = [
-//    DayModule
+    DayModule
 ];
 const options = {
     failureThreshold: 0
@@ -27,8 +27,9 @@ describe("Testing the library", function () {
         },
     }
     testModules.forEach( (module) => {
-        it(`Test Module ${module.name}`, function () {
-            const testResult = module();
+        describe(`Test Module ${module.title}`, function () {
+            const testResult = module.test();
+            console.table(testResult);
             result.passed += (testResult?.passed) ?? 0;
             result.failed += (testResult?.failed) ?? 0;
             result.skipped += (testResult?.skipped) ?? 0;
