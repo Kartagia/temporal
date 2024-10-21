@@ -4,13 +4,14 @@
  * @module Temporal 
  */
 
+import {asInteger, isInteger} from "./integer.mjs";
+
 /**
- * @typedef {number & {__type__: "integer"}} Int
+ * @typedef {import("./integer.mjs").Integer} Integer
  */
 
 /**
- * The integer type.
- * @typedef {Int|bigint} Integer
+ * @typedef {import("./integer.mjs").Int} Int
  */
 
 /**
@@ -44,6 +45,7 @@
  */
 
 /**
+ * The temporal field representing a day.
  * @typedef {DayProps & TemporalFieldProperties & TemporalFieldMethods} Day
  */
 
@@ -55,12 +57,19 @@
  */
 export function createDay(dayValue, options={}) {
     
+    if (!isInteger(dayValue)) {
+        throw new TypeError("Cannot create a day from non-integer value");
+    }
+
     const actualOptions = {
-        min: this.options.min ?? 1, max: this.options.max ?? Number.MAX_SAFE_INTEGER
+        min: options.min ?? 1, max: options.max ?? Number.MAX_SAFE_INTEGER
     };
     
-    return {
-        get name() {
+    /**
+     * @type {Day}
+     */
+    const result =  {
+        get fieldName() {
             return "day"
         },
         get day() {
@@ -89,9 +98,10 @@ export function createDay(dayValue, options={}) {
             }
         },
         toJSON() {
-            return JSON.stringify({day: this.day, options});
+            return JSON.stringify([this.day, options]);
         }
     };
+    return result;
 }
 
 /**
