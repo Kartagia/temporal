@@ -18,6 +18,93 @@ import { asInteger, isInteger } from "./integer.mjs";
 // Temporal exceptions
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * A temporal exception represents a temporal related exceptions.
+ * 
+ * @template CAUSE The type of teh cause of the error.
+ * @abstract
+ */
+export class TemporalException extends Error {
+
+    /**
+     * Create a new temporal exception.
+     * @param {string} sourceName The source of the exception.
+     * @param {string} [message] The message of the exception.
+     * @param {CAUSE} [cause] The optinal cause of the exception.
+     */
+    constructor(sourceName, message=undefined, cause=undefined) {
+        super(message, cause);
+        this.name = this.constructor.name;
+        this.source = sourceName;
+    }
+}
+
+/**
+ * An error indicating a temporal field was not supported.
+ * 
+ * @template [CAUSE=undefined] The cause of the temporal exception.
+ * @extends {TemporalException<CAUSE>} The 
+ */
+export class UnsupportedTemporalFieldError extends TemporalException {
+
+    /**
+     * The default message of the error.
+     */
+    static defaultMessage = "Unsupported temporal field";
+
+    /**
+     * Create a new unsupported temporal field error.
+     * @param {string} fieldName The name of the invalid temporal field.
+     * @param {string} [message] The message of the exception. Defaults to the default message.
+     * @param {CAUSE} [cause] The cause of the error.
+     */
+    constructor(fieldName, message = UnsupportedTemporalFieldError.defaultMessage, cause = undefined) {
+        super(fieldName, message, cause);
+    }
+
+    /**
+     * The field name of the invalid temporal field.
+     * @type {string}
+     */
+    get fieldName() {
+        return super.sourceName;
+    }
+}
+
+/**
+ * An error indicating a temporal unit was not supported.
+ * 
+ * @template [CAUSE=undefined] The cause of the temporal exception.
+ * @extends {TemporalException<CAUSE>} The 
+ */
+export class UnsupportedTemporalUnitError extends TemporalException {
+
+    /**
+     * The default message of the error.
+     */
+    static defaultMessage = "Unsupported temporal unit";
+
+    /**
+     * Create a new unsupported temporal unit error.
+     * @param {string} unitName The name of the invalid temporal unit.
+     * @param {string} [message] The message of the exception. Defaults to the default message.
+     * @param {CAUSE} [cause] 
+     */
+    constructor(unitName, message = UnsupportedTemporalUnitError.defaultMessage, cause = undefined) {
+        super(unitName, message, cause);
+    }
+
+    /**
+     * The field name of the invalid temporal field.
+     * @type {string}
+     */
+    get unitName() {
+        return super.sourceName;
+    }
+}
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Temporal fields
 ////////////////////////////////////////////////////////////////////////////////////////////
