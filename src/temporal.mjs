@@ -14,6 +14,35 @@ import { asInteger, isInteger } from "./integer.mjs";
  * @typedef {import("./integer.mjs").Int} Int
  */
 
+/**
+ * A predicate of a value.
+ * @template [TYPE=any] The value type of the tested values.
+ * @callback Predicate
+ * @param {TYPE} value The tested value.
+ * @returns {boolean} True, if and only if the value fulfils the predicate.
+ */
+
+/**
+ * A range of values. 
+ * @template [TYPE=any] The value type of the range.
+ * @typedef {Object} Range
+ * @property {TYPE} min The lower boundary of the range.
+ * @property {TYPE} max The upper boundary of the range.
+ * @property {Predicate<TYPE>} includes Does the range contain given value.
+ */
+
+/**
+ * The properties of the range.
+ * @template [TYPE=any] The value type of the range.
+ * @typedef {Pick<Range<TYPE>, "min"|"max">} RangeProps
+ */
+
+/**
+ * The methods of the range.
+ * @template [TYPE=any] The value type of the range.
+ * @typedef {Omit<Range<TYPE>, "min"|"max">} RangeMethods
+ */
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Temporal exceptions
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -32,8 +61,8 @@ export class TemporalException extends Error {
      * @param {string} [message] The message of the exception.
      * @param {CAUSE} [cause] The optinal cause of the exception.
      */
-    constructor(sourceName, message=undefined, cause=undefined) {
-        super(message, cause);
+    constructor(sourceName, message = undefined, cause = undefined) {
+        super(message, {cause});
         this.name = this.constructor.name;
         this.source = sourceName;
     }
@@ -134,6 +163,81 @@ export class UnsupportedTemporalUnitError extends TemporalException {
  * creator function as parameters. 
  */
 
+/**
+ * The options for the with field exception.
+ * @template TYPE
+ * @template [EXCEPTION=UnsupportedTemporalFieldError] The type of the thrown exception.
+ * @template [CAUSE=undefined] The cause of the exception 
+ * @typedef {Object} WithFieldOptions
+ * @property {string} [message] The error message of the exception.
+ * @property {(message: string, cause?: CAUSE|undefined)=>EXCEPTION} [exception] The creaction of the exception.
+ * This method is required, if the EXCEPTION does not contain the default exception.
+ */
+
+/**
+ * Create a new temporal field from the current field by applying a field with value.
+ * @template [TYPE=Integer]
+ * @template [EXCEPTION=UnsupportedTemporalFieldError] The type of the thrown exception.
+ * @template [CAUSE=undefined] The cause of the exception 
+ * @callback WithField
+ * @param {string} fieldName The name of the field.
+ * @param {TYPE} value The value of the field.
+ * @param {WithFieldOptions<TYPE, EXCEPTION, CAUSE>} [options] The options of the with field. 
+ * @returns {TemporalField} The temporal field of the 
+ * @throws {EXCEPTION} The field is not supported.
+ * @throws {RangeError} The field value is not supported.
+ */
+
+/**
+ * The temporal field method suggestions.
+ * @template [TYPE=Integer] The type of the valid value.
+ * @template [EXCEPTION=UnsupportedTemporalFieldError] The type of the thrown exception.
+ * @template [CAUSE=undefined] The cause of the exception 
+ * @typedef {Object} TemporalFieldMethodSuggestions
+ * @property {WithField<TYPE, EXCEPTION, CAUSE>} with 
+ */
+
+/**
+ * A temporal field is the temporal structure.
+ * @typedef {TemporalFieldProperties & TemporalFieldMethods} TemporalField
+ * @abstract
+ */
+
+
+/**
+ * Create a new temporal field.
+ * @param {string} fieldName The name of the temporal fie.d
+ * @param {TemporalFieldOptions} [options] 
+ * @returns {TemporalField} The temporal field.
+ */
+export function createTemporalField(fieldName, options={}) {
+
+    const actualOptions = {...options};
+
+    return {
+        get fieldName() {
+            return fieldName;
+        },
+        get options() {
+            return actualOptions;
+        },
+        range(field) {
+            switch (field) {
+                case fieldName: 
+                    return {
+                        min: this.options.min,
+                        max: this.options.max,
+                        includes(value)  {
+                            return isInteger(value) && (this.min <= value && value <= this.max);
+                        }
+                    };
+                default:
+                    throw new UnsupportedTemporalFieldError(field);
+            }
+        }
+    };
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Dates
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,16 +276,51 @@ export const DateField = Object.freeze({
 /**
  * A temporal era.
  * @typedef {EraProperties & Omit<TemporalFieldProperties, "options"> & { options: TemporalFieldOptions & EraOptions } & TemporalFieldMethods} Era
+ * @extends {TemporalField}
  */
 
 /**
+ * The canonical era construction properties specific to the era defined by the range of canonical years.
+ * - The era can be either descending or ascending.
+ * - If the minYear is greater than the maxYear, the era will be descending with year of era increasing when canonical year decreases.
+ * - If the minYear is less than or equal to the maxYear, the era is ascending. 
+ * - The length of era is determined by the number of years between maxYear and minYear with boudnaries indluded.
+ * @typedef {Object} CanonicalEraOptions
+ * @property {Integer} minYear The minimal canonical year of the era.
+ * @property {Integer} maxYear The maximal canonical year of the era.
+ */
+
+/**
+ * A canonical ascending era with specific number of years.
+ * - The largest canonical year is determiend by the first canonical year of the era, and 
+ * the length of era.
+ * @typedef {Object} CanonicalAscendingEraOptions
+ * @property {Integer} minYear The minimal canonical year of the era.
+ * @property {Integer} eraLength The number of years of the era.
+ */
+
+/**
+ * The construction options for a non-canonical era.
+ * A non-canonical era has no link between canonical years and the year of era.
+ * @typedef {Object} NonCanonicalEraOptions
+ * @property {Integer} eraLength The number of years of the era.
+ */
+
+
+/**
  * The era construction options.
- * @typedef {Object} EraOptions
+ * @typedef {Object} CommonEraOptions
  * @property {string} suffix The suffix of the era.
  * @property {string} [name] The name of the era.
- * @property {Integer} [minYear] The minimal year of the era.
- * @property {Integer} [maxYear] The maximal year of the era.
+ * @property {Integer} [minYear] The minimal canonical year of the era.
+ * @property {Integer} [maxYear] The maximal canonical year of the era.
  * @property {Integer} [eraLength] The number of years of the era.
+ * @property {boolean} [descending=false] Does the year of era reduce the common era. 
+ */
+
+/**
+ * The construciton options of the era.
+ * @typedef {CommonEraOptions & (CanonicalAscendingEraOptions|CanonicalEraOptions|NonCanonicalEraOptions)} EraOptions
  */
 
 /**
@@ -189,26 +328,36 @@ export const DateField = Object.freeze({
  * @param {Integer} eraValue The era value.
  * @param {TemporalFieldOptions & EraOptions } [options] The era options 
  * @returns {Era}
+ * @throws {TypeError} Some of the options had invalid value type.
+ * @throws {RangeError} Some of the options had invalid value.
  */
 export function createEra(eraValue, options = {}) {
     const actualOptions = { ...options };
 
     if (actualOptions.minYear != null) {
-        if (!isInteger(actualOptions.minYear)) {
-            throw new TypeError("Invalid type of minimal year");
+        const propertyName = "minYear";
+        const propertyDesc = "minimal year";
+        if (!isInteger(actualOptions[propertyName])) {
+            throw new TypeError(`Invalid type of ${propertyDesc}`);
         }
         actualOptions.maxYear = actualOptions.maxYear == null ? MAX_CANONICAL_YEAR : actualOptions.maxYear;
         if (actualOptions.maxYear < actualOptions.minYear) {
             (actualOptions.minYear, actualOptions.maxYear) = (actualOptions.maxYear, actualOptions.minYear);
+            actualOptions.descending = true;
         }
-        actualOptions.eraLength = actualOptions.eraLength == null ? actualOptions.maxYear - actualOptions.minYear +1: actualOptions.eraLength;
-    }
-    if (actualOptions.maxYear != null) {
+        actualOptions.eraLength = asInteger(actualOptions.eraLength == null ? actualOptions.maxYear - actualOptions.minYear + 1 : actualOptions.eraLength);
+    } else if (actualOptions.maxYear != null) {
+        const propertyName = "maxYear";
+        const propertyDesc = "maximal year";
         if (!isInteger(actualOptions.maxYear)) {
-            throw new TypeError("Invalid type of maximal year");
-        } else if (actualOptions.maxYear < (actualOptions.minYear == null ? 1 : actualOptions.minYear) ) {
-            throw new RangeError("Invalid maximum year - the maximum before the minimum");
+            throw new TypeError(`Invalid type of ${propertyDesc}`);
+        } else if (actualOptions.eraLength != null && actualOptions.eraLength !== Math.abs(actualOptions.maxYear - actualOptions.minYear)+1) {
+            throw new RangeError(`Invalid value of ${propertyDesc}`);
         }
+        actualOptions.eraLength = asInteger(actualOptions.eraLength)
+    } else {
+        // Calculating the max year from the first year and the era length.
+        actualOptions.maxYear = actualOptions.minYear + (actualOptions.eraLength || 0);
     }
 
     return {
@@ -240,12 +389,16 @@ export function createEra(eraValue, options = {}) {
                         }
                     };
                 case "canonicalYear":
-                    return {
-                        min: this.options.minYear,
-                        max: this.options.maxYear,
-                        includes(value) {
-                            return isInteger(value) && this.min <= value && value <= this.max;
+                    if (this.options.minYear != null && this.options.maxYear != null) {
+                        return {
+                            min: this.options.minYear,
+                            max: this.options.maxYear,
+                            includes(value) {
+                                return isInteger(value) && this.min <= value && value <= this.max;
+                            }
                         }
+                    } else {
+                        throw new UnsupportedTemporalFieldError(fieldName);
                     }
                 case "year":
                     return {
@@ -257,7 +410,7 @@ export function createEra(eraValue, options = {}) {
                     };
 
                 default:
-                    throw new Error("Unsupported temporal field");
+                    throw new UnsupportedTemporalFieldError("Unsupported temporal field");
             }
         },
         valueOf() {
@@ -283,6 +436,12 @@ export function createEra(eraValue, options = {}) {
  * @typedef {TemporalFieldOptions & {era: Era}} YearOfEraOptions
  */
 
+/**
+ * A year of era reprenting a year belonging ot the era.
+ * @typedef {TemporalField & YearOfEraProperties} YearOfEra
+ * @extends {TemporalField}
+ */
+
 
 /**
  * Create year of era.
@@ -291,18 +450,29 @@ export function createEra(eraValue, options = {}) {
  * @returns {YearOfEra} The year of era created from teh year valeu and options.
  */
 export function createYearOfEra(yearValue, options = {}) {
+    const fieldName = "yearOfEra";
+    const fieldDesc = "a year of era";
+    const canonicalFieldDesc = "a canonical year";
 
     if (!isInteger(yearValue)) {
-        throw new TypeError("Invalid year of era");
-    } else if (yearValue < 1 && yearValue >= options.era.eraLength) {
-        throw new RangeError("Invalid year of era.");
+        throw new TypeError(`Invalid type of ${ options.canonicalYear ? canonicalFieldDesc :  fieldDesc}`);
+    } else if ( options.canonicalYear == false && (yearValue < 1 && yearValue >= options.era.eraLength) ) {
+        throw new RangeError(`Invalid value of ${fieldDesc}`);
+    } else if ( options.canonicalYear == true && (options.era.range("canonicalYear").includes(yearValue)) ) {
+        throw new RangeError(`Invalid value of a ${canonicalFieldDesc}`);
     }
 
+    const actualYearValue = (options.canonicalYear ? options.era.with("canonicalYear", yearValue, {message: `Invalid value of ${canonicalFieldDesc}`, exception: (message, cause) => {
+        return new RangeError(message, {cause: cause});
+    }}): yearValue);
 
     /**
      * @type {YearOfEra}
      */
     const result = {
+        get fieldName() {
+            return fieldName;
+        },
         /**
          * The era of year.
          * @type {Era}
@@ -310,7 +480,7 @@ export function createYearOfEra(yearValue, options = {}) {
         get era() { return this.options.era },
         get year() { return yearValue },
         get canonicalYear() {
-            return (this.options.minYear <= this.options.maxYear ? this.options.minYear + this.year -1 : this.options.maxYear - this.year +1);
+            return (this.options.minYear <= this.options.maxYear ? this.options.minYear + this.year - 1 : this.options.maxYear - this.year + 1);
         },
         get options() {
             return actualOptions;
@@ -337,6 +507,7 @@ export function createYearOfEra(yearValue, options = {}) {
 /**
  * The generic year. 
  * @typedef {YearProps & TemporalFieldProperties & TemporalFieldMethods} Year
+ * @extends {TemporalField}
  */
 
 /**
@@ -347,6 +518,7 @@ export function createYearOfEra(yearValue, options = {}) {
 /**
  * The canonical year without era.
  * @typedef {Year} CanonicalYear
+ * @extends {TemporalField}
  */
 
 /**
@@ -377,6 +549,7 @@ export function createYear(yearValue, options = {}) {
  * Create a canonical year.
  * @param {Integer} yearValue The year value.
  * @param {TemporalFieldOptions} options 
+ * @returns {CanonicalYear & TemporalFieldMethodSuggestions<Integer|Era>} The created canonical year.
  */
 export function createCanonicalYear(yearValue, options = {}) {
     const actualOptions = { min: MIN_CANONICAL_YEAR, max: MAX_CANONICAL_YEAR, ...options };
@@ -413,7 +586,41 @@ export function createCanonicalYear(yearValue, options = {}) {
                         }
                     };
                 default:
-                    throw new Error("Unsupported temporal field");
+                    throw new UnsupportedTemporalFieldError("Unsupported temporal field");
+            }
+        },
+
+        /**
+         * reate a field with 
+         * @template [CAUSE=undefined] The cause of the exception.
+         * @param {string} fieldName 
+         * @param {Integer|Era} value
+         * @param {WithFieldOptions<Integer|Era, UndefinedTemporalFieldError, CAUSE>} [options] The with options.
+         * @returns {TemporalField} The temporal field created by applying given field with value to the current
+         * temporal.
+         * @throws {UnsupportedTemporalFieldError} The temporal field is not compatible with the field name.  
+         */
+        with(fieldName, value, options={}) {
+            const actualOptions = {...defaultWithOptions, message: "Invalid temporal field", exception: (( /** @type {string} */ message, /** @type {CAUSE|undefined} */ cause = undefined) => (
+                new UnsupportedTemporalFieldError(fieldName, message, cause)
+            )), ...options}
+            switch (fieldName) {
+                case "era":
+                    try {
+                        if (value.range("canonicalYear").includes(this.year)) {
+                            if (era.descending) {
+                                return createYearOfEra(value.maxYear - this.year +1, {era: value});
+                            } else {
+                                return createYearOfEra(this.year - value.minYear +1, {era: value});
+                            }
+                        }
+                    } catch (error) {
+                        throw new UnsupportedTemporalFieldError(fieldName);
+                    }
+                case "year":
+                    return createCanonicalYear(value, this.options);
+                default:
+                    throw new UnsupportedTemporalFieldError(fieldName);
             }
         },
 
@@ -455,6 +662,7 @@ export function createCanonicalYear(yearValue, options = {}) {
 /**
  * The temporal field representing a day.
  * @typedef {DayProps & TemporalFieldProperties & TemporalFieldMethods} Day
+ * @extends {TemporalField}
  */
 
 /**
