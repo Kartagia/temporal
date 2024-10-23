@@ -9,6 +9,11 @@ import { createEra, DateField } from "../../src/temporal.mjs";
 
 /**
  * The sub modules. 
+ * @typedef {Object} EraTestCase
+ * @property {string} eraName
+ * @property {string} eraSuffix
+ * @property {import("../../src/integer.mjs").Integer} eraValue
+ * @property {import("../../src/temporal.mjs").EraOptions} eraOptions
  */
 const testCases = [
 
@@ -17,6 +22,9 @@ const testCases = [
             eraName: "Before Christ",
             eraSuffix: "BC", 
             eraValue: 1,
+            /**
+             * @type {import("../../src/temporal.mjs").EraOptions}
+             */
             eraOptions: {
                 minYear: -999999999,
                 maxYear: 0,
@@ -30,6 +38,25 @@ const testCases = [
             eraOptions: {
                 minYear: 1,
                 maxYear: 999999999
+            }
+        },
+        {
+            eraName: "Before Common Era",
+            eraSuffix:  "BCE",
+            eraValue: 1,
+            eraOptions: {
+                minYear: 0,
+                eraLength: 9999,
+                descending: true
+            }
+        },
+        {
+            eraName: "Common Era",
+            eraSuffix: "CE",
+            eraValue: 2,
+            eraOptions: {
+                minYear: 1,
+                eraLength: 9999
             }
         }
     ].map( ({eraName, eraSuffix, eraValue, eraOptions }) => (
@@ -53,12 +80,16 @@ const testCases = [
             expect(canonicalYearRange.min).equals(tested.options.minYear);
             expect(canonicalYearRange.max).equals(tested.options.maxYear);
             const yearRange = tested.range(DateField.Year);
-            expect(yearRange.min).equals(1);
-            expect(yearRange.max).equals(Math.abs(eraOptions.minYear - eraOptions.maxYear)+1);
+            expect(yearRange.min, `Invalid year range minimum ${yearRange.min}`).equals(1);
+            if (eraOptions.maxYear != null) {
+                expect(yearRange.max, `Invalid maximum year`).equals(Math.abs(eraOptions.minYear - eraOptions.maxYear)+1);
+            }
             expect(tested.valueOf(), `Invalid value`).equal(eraValue);
         }
     }))
 ];
+
+
 
 /**
  * The test module of day.
