@@ -23,7 +23,7 @@ const testCases = [
          * @type {import("../testFramework/index.mjs").TestCase<function, number, Day, undefined>}
          */
         {
-        title: `Create simple day ${yearValue}`,
+        title: `Create year ${yearValue} of era ${era.name ?? era.suffix}`,
         param: [yearValue, {era}],
         tested: createYearOfEra,
         test(tested, param) {
