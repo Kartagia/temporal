@@ -7,12 +7,13 @@ import { describe, it } from "mocha";
 
 import DayModule from "./day/day.test.mjs";
 import CanonicalYearModule from "./year/year.test.mjs";
+import EraModule from "./era/era.test.mjs";
 
 /**
  * @type {import("./testFramework/index.mjs").TestModule[]}
  */
 const testModules = [
-    DayModule, CanonicalYearModule
+    DayModule, CanonicalYearModule, EraModule
 ];
 const options = {
     failureThreshold: 0
