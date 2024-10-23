@@ -6,6 +6,7 @@ import { describe, it } from "mocha";
  */
 
 import DayModule from "./day/day.test.mjs";
+import CanonicalYearModule from "./year/year.test.mjs";
 
 /**
  * @type {import("./testFramework/index.mjs").TestModule[]}
