@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { createTestResult, testTestCase } from "../testFramework/index.mjs";
-import { createCanonicalYear, createDay } from "../../src/temporal.mjs";
+import { createCanonicalYear } from "../../src/temporal.mjs";
 
 /**
  * The sub modules. 
@@ -41,7 +41,7 @@ export const TestCanonicalYear = {
         title: "Temporal Year",
         test() {
             var result = createTestResult();
-            describe(`Test ${TestDay.title}`, function () {
+            describe(`Test ${TestCanonicalYear.title}`, function () {
             testCases.forEach( (subModule, index) => {
                 const testResult = testTestCase(subModule, index);
                 result.passed += testResult.passed;

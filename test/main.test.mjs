@@ -12,7 +12,7 @@ import CanonicalYearModule from "./year/year.test.mjs";
  * @type {import("./testFramework/index.mjs").TestModule[]}
  */
 const testModules = [
-    DayModule
+    DayModule, CanonicalYearModule
 ];
 const options = {
     failureThreshold: 0
