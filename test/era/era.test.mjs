@@ -5,7 +5,7 @@
 
 import { expect } from "chai";
 import { createTestResult, testTestCase } from "../testFramework/index.mjs";
-import { createEra } from "../../src/temporal.mjs";
+import { createEra, DateField } from "../../src/temporal.mjs";
 
 /**
  * The sub modules. 
@@ -49,8 +49,12 @@ const testCases = [
             expect(tested).not.null;
             expect(tested.era).equal(eraValue);
             expect(tested.suffix).equal(eraSuffix);
-            const yearRange = expect()
-            expect(tested.range(""))
+            const canonicalYearRange = tested.range(DateField.CanonicalYear);
+            expect(canonicalYearRange.min).equals(tested.options.minYear);
+            expect(canonicalYearRange.max).equals(tested.options.maxYear);
+            const yearRange = tested.range(DateField.Year);
+            expect(yearRange.min).equals(1);
+            expect(yearRange.max).equals(Math.abs(eraOptions.minYear - eraOptions.maxYear)+1);
             expect(tested.valueOf(), `Invalid value`).equal(eraValue);
         }
     }))
