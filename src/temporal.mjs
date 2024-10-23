@@ -243,11 +243,6 @@ export function createTemporalField(fieldName, options={}) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * The date fields in descending order of magnitude.
- */
-export const dateFields = Object.freeze([DateField.Era, DateField.Year, DateField.Season, DateField.Month, DateField.Week, DateField.Day]);
-
-/**
  * The date fields enumeration.
  * @enum {string}
  */
@@ -259,6 +254,13 @@ export const DateField = Object.freeze({
     Week: "week",
     Season: "season"
 })
+
+/**
+ * The date fields in descending order of magnitude.
+ */
+export const dateFields = Object.freeze([DateField.Era, DateField.Year, DateField.Season, DateField.Month, DateField.Week, DateField.Day]);
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Era
@@ -342,7 +344,7 @@ export function createEra(eraValue, options = {}) {
         }
         actualOptions.maxYear = actualOptions.maxYear == null ? MAX_CANONICAL_YEAR : actualOptions.maxYear;
         if (actualOptions.maxYear < actualOptions.minYear) {
-            (actualOptions.minYear, actualOptions.maxYear) = (actualOptions.maxYear, actualOptions.minYear);
+            [actualOptions.minYear, actualOptions.maxYear] = [actualOptions.maxYear, actualOptions.minYear];
             actualOptions.descending = true;
         }
         actualOptions.eraLength = asInteger(actualOptions.eraLength == null ? actualOptions.maxYear - actualOptions.minYear + 1 : actualOptions.eraLength);
