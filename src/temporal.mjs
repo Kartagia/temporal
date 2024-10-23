@@ -250,6 +250,7 @@ export const DateField = Object.freeze({
     Day: "day",
     Month: "month",
     Year: "year",
+    CanonicalYear: "canonicalYear",
     Era: "era",
     Week: "week",
     Season: "season"
@@ -379,10 +380,10 @@ export function createEra(eraValue, options = {}) {
         get options() {
             return actualOptions;
         },
-        range(fieldName = "era") {
+        range(fieldName = DateField.Era) {
 
             switch (fieldName) {
-                case "era":
+                case DateField.Era:
                     return {
                         min: this.options.min ?? Number.MIN_SAFE_INTEGER,
                         max: this.options.max ?? Number.MAX_SAFE_INTEGER,
@@ -402,7 +403,7 @@ export function createEra(eraValue, options = {}) {
                     } else {
                         throw new UnsupportedTemporalFieldError(fieldName);
                     }
-                case "year":
+                case DateField.Year:
                     return {
                         min: 1,
                         max: this.options.eraLength,
