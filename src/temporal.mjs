@@ -565,7 +565,7 @@ export function createCanonicalYear(yearValue, options = {}) {
         fieldName: DateField.year,
 
         get year() {
-            return this.year;
+            return yearValue;
         },
 
         get options() {
