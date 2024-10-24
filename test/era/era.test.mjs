@@ -83,6 +83,8 @@ const testCases = [
             expect(yearRange.min, `Invalid year range minimum ${yearRange.min}`).equals(1);
             if (eraOptions.maxYear != null) {
                 expect(yearRange.max, `Invalid maximum year`).equals(Math.abs(eraOptions.minYear - eraOptions.maxYear)+1);
+                const maxYear = canonicalYearRange.max;
+                expect(maxYear, `Invalid ${tested.options.descending ? "min":"max"}imum year ${maxYear}`).equals(eraOptions.maxYear);
             }
             expect(tested.valueOf(), `Invalid value`).equal(eraValue);
         }
