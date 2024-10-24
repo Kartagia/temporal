@@ -453,6 +453,7 @@ export function createEra(eraValue, options = {}) {
  * @returns {YearOfEra} The year of era created from teh year valeu and options.
  */
 export function createYearOfEra(yearValue, options = {}) {
+    const actualOptions = {...options};
     const fieldName = "yearOfEra";
     const fieldDesc = "a year of era";
     const canonicalFieldDesc = "a canonical year";
@@ -495,6 +496,7 @@ export function createYearOfEra(yearValue, options = {}) {
             return `${this.year}${this.era.suffix}`
         }
     }
+    return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
