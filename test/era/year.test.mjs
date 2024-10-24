@@ -18,8 +18,8 @@ const testCases = [
         title: `Create year 1 of Era ${AD.name ?? AD.suffix}`,
         param: [1, {era: AD}],
         tested: createYearOfEra,
-        test(constructorFn, value, options={}) {
-            return constructorFn(value, options);
+        test(constructorFn, param) {
+            return constructorFn(...(param == null ? [] : param));
         },
         resultValidator( /** @type {YearOfEra} */ tested) {
             expect(tested, "Not an object").a("object");
@@ -28,7 +28,7 @@ const testCases = [
         }
     },
     ...[1,15, 31, 365, 366, 9999, 999999999].map(
-        (yearValue) => (yearValue < 1 ? {yearValue, era: BC} : { era: AD})
+        (yearValue) => (yearValue < 1 ? {yearValue: -yearValue, era: BC} : {yearValue, era: AD})
     ).map( ({yearValue, era}) => (
         
         /**
@@ -39,6 +39,7 @@ const testCases = [
         param: [yearValue, {era}],
         tested: createYearOfEra,
         test(tested, param) {
+            console.table(param.map( (entry, index) => (index==1? entry.name: entry)));
             return tested(...(param ? param : []));
         },
         resultValidator: ( /** @type {import("../../src/temporal.mjs").YearOfEra} */ tested) => {
@@ -56,7 +57,7 @@ const testCases = [
                         return {
                             title: `Invalid create year ${yearOfEra} of era ${era.name ?? era.suffix}`,
                             tested: createYearOfEra,
-                            params: [yearOfEra, {era}],
+                            param: [yearOfEra, {era}],
                             test(tested, param) {
                                 return tested(...(param ? param : []));
                             },
@@ -73,11 +74,11 @@ const testCases = [
  * The test module of day.
  * @type {import("../testFramework/index.mjs").TestModule}
  */
-export const TestDay = {
-        title: "Temporal Day",
+export const TestYearOfEra = {
+        title: "Temporal Year of Era",
         test() {
             var result = createTestResult();
-            describe(`Test ${TestDay.title}`, function () {
+            describe(`Test ${TestYearOfEra.title}`, function () {
             testCases.forEach( (subModule, index) => {
                 const testResult = testTestCase(subModule, index);
                 result.passed += testResult.passed;
@@ -89,4 +90,4 @@ export const TestDay = {
     }
 };
 
-export default TestDay;
+export default TestYearOfEra;
