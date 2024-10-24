@@ -39,7 +39,6 @@ const testCases = [
         param: [yearValue, {era}],
         tested: createYearOfEra,
         test(tested, param) {
-            console.table({yearValue: param?.[0], era: param?.[1]?.era});
             return tested(...(param ? param : []));
         },
         resultValidator: ( /** @type {import("../../src/temporal.mjs").YearOfEra} */ tested) => {
