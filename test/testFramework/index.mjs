@@ -69,6 +69,7 @@ export function createTestResult(options={}) {
  * @template [EXCEPTION=any] The exception thrown by the test.
  * @typedef {Object} TestCase
  * @property {TYPE} tested The tested value.
+ * @property {PARAM} [param] The parmeters of the test case.
  * @property {EXCEPTION} [exception] The expected exception. 
  * @property {RESULT} [expected] The expected result.
  * @property {Test<TYPE, PARAM, RESULT, EXCEPTION>} test The test function of the case.
@@ -88,7 +89,7 @@ export function createTestResult(options={}) {
 export function testTestCase(testCase, index=undefined) {
     const result = createTestResult();
     try {
-        it(`Test Case ${index == null ? "" : `#${index}`}${testCase.title ?? ""}`, function() {
+        it(`Test Case ${index == null ? "" : `#${index}: `}${testCase.title ?? ""}`, function() {
             if (testCase.exception !== undefined) {
                 expect(() => {testCase.test(testCase.tested, testCase.param)}).throw(testCase.exception);
                 result.passed++;
