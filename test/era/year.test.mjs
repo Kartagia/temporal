@@ -7,8 +7,8 @@ import { expect } from "chai";
 import { createTestResult, testTestCase } from "../testFramework/index.mjs";
 import { createEra, createYearOfEra } from "../../src/temporal.mjs";
 
-const BC = createEra(1, {minYear: -99999999, maxYear: 0, name: "Before Christ", suffix: "BC"});
-const AD = createEra(2, {minYear: 1, maxYear: 99999999, name: "Anno Domini", suffix: "AD"});
+const BC = createEra(1, {minYear: 0, eraLength: 999999999, descending: true, name: "Before Christ", suffix: "BC"});
+const AD = createEra(2, {minYear: 1, maxYear: 999999999, name: "Anno Domini", suffix: "AD"});
 
 /**
  * The sub modules. 
@@ -27,8 +27,8 @@ const testCases = [
             expect(tested.year).equal(1);
         }
     },
-    ...[1,15, 31, 365, 366, 9999, 999999999].map(
-        (yearValue) => (yearValue < 1 ? {yearValue: -yearValue, era: BC} : {yearValue, era: AD})
+    ...[1,15, 31, 365, 366, 9999, 999999999, 0].map(
+        (yearValue) => (yearValue < 1 ? {yearValue: 0-yearValue+1, era: BC} : {yearValue, era: AD})
     ).map( ({yearValue, era}) => (
         
         /**
@@ -39,7 +39,7 @@ const testCases = [
         param: [yearValue, {era}],
         tested: createYearOfEra,
         test(tested, param) {
-            console.table(param.map( (entry, index) => (index==1? entry.name: entry)));
+            console.table({yearValue: param?.[0], era: param?.[1]?.era});
             return tested(...(param ? param : []));
         },
         resultValidator: ( /** @type {import("../../src/temporal.mjs").YearOfEra} */ tested) => {
