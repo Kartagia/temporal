@@ -460,7 +460,7 @@ export function createYearOfEra(yearValue, options = {}) {
 
     if (!isInteger(yearValue)) {
         throw new TypeError(`Invalid type of ${ options.canonicalYear ? canonicalFieldDesc :  fieldDesc}`);
-    } else if ( options.canonicalYear == false && (!options.era.range(DateField.Year).includes(yearValue)) ) {
+    } else if ( (options.canonicalYear == false || options.canonicalYear == null) && (!options.era.range(DateField.Year).includes(yearValue)) ) {
         throw new RangeError(`Invalid value of ${fieldDesc}`);
     } else if ( options.canonicalYear == true && (!options.era.range("canonicalYear").includes(yearValue)) ) {
         throw new RangeError(`Invalid value of a ${canonicalFieldDesc}`);
